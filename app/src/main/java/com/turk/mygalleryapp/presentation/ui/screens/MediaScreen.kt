@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -13,63 +12,50 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.size.Scale
-import com.turk.mygalleryapp.domain.model.Album
+import com.turk.mygalleryapp.R
+import com.turk.mygalleryapp.domain.model.Media
 import com.turk.mygalleryapp.presentation.GalleryViewModel
-import com.turk.mygalleryapp.presentation.ui.theme.SmallBody
-import com.turk.mygalleryapp.presentation.ui.theme.SmallTitleBold
 import com.turk.mygalleryapp.presentation.ui.theme.smallUnit
 
 
 @Composable
-fun GalleryScreen(viewModel:GalleryViewModel,viewMediaGallery:()->Unit){
-
-
-    val galleryDataState= viewModel.galleryData.collectAsState()
+fun MediaScreen(viewModel: GalleryViewModel,openMediaFile:(Media)->Unit){
 
     Box ( modifier = Modifier
         .fillMaxSize()
         .padding(smallUnit)
         .background(color = Color.Transparent),
         contentAlignment = Alignment.TopStart){
-        GalleryGrid(galleryDataState.value.albumsList){
-
-            viewModel.selectedIndex=it
-            viewMediaGallery()
-        }
+        MediaFilesGrid(viewModel.getSelectedAlbumMediaFiles(),openMediaFile)
     }
 
 }
 
 @Composable
-fun GalleryGrid(list:List<Album>,viewMediaGallery:(Int)->Unit) {
+fun MediaFilesGrid(list:List<Media>,openMediaFile:(Media)->Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
-        ) {
+    ) {
         itemsIndexed(list) { index, item ->
-            GalleryCellItem(item){
-                viewMediaGallery(index)
-            }
+            MediaFilesCellItem(item,openMediaFile)
         }
     }
 }
 
 @Composable
-fun GalleryCellItem(data: Album,viewMediaGallery:()->Unit){
-
+fun MediaFilesCellItem(data: Media,openMediaFile:(Media)->Unit){
     val painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(LocalContext.current)
             .data(data.uri)
@@ -79,32 +65,27 @@ fun GalleryCellItem(data: Album,viewMediaGallery:()->Unit){
             .build(),
         contentScale = ContentScale.FillBounds
     )
-
-    Column (
-        Modifier
-            .padding(5.dp)
-            .clickable {
-                viewMediaGallery()
-            }) {
+    Box (Modifier.padding(5.dp)) {
         Image(
             modifier = Modifier
                 .size(98.dp)
-                .clip(Shapes().medium),
+                .clip(Shapes().medium).clickable {
+                    openMediaFile(data)
+                },
             contentScale = ContentScale.Crop,
             painter = painter,
             contentDescription ="thumbnail of album ${data.label}"
         )
 
-        SmallTitleBold(text = data.label, color = Color.White)
-        SmallBody(text = "${data.mediaCount}", color = Color.Gray)
+        if(data.isVideo) {
+
+            Image(painter = painterResource(id = R.drawable.play),
+                contentDescription = "play button",
+                modifier = Modifier.size(30.dp).align(Alignment.Center)
+
+            )
+        }
+
     }
 
-}
-
-
-@Preview
-@Composable
-fun ShowGallleryScreen(){
-
-    GalleryScreen(hiltViewModel()){}
 }
