@@ -16,7 +16,7 @@ suspend fun ContentResolver.getGalleryData(): GalleryData {
 
     return withContext(Dispatchers.IO) {
         val galleryData = GalleryData()
-        val foldersMap = HashMap<String, Album>()
+        val albumMap = HashMap<String, Album>()
         query().use {
 
             while (it.moveToNext()) {
@@ -44,9 +44,9 @@ suspend fun ContentResolver.getGalleryData(): GalleryData {
                         it.getString(it.getColumnIndexOrThrow(MediaStore.MediaColumns.RELATIVE_PATH))
 
 
-                    val folder = Album(albumId, albumName,  ContentUris.withAppendedId(contentUri, mediaId), path, relativePath)
-                    if (foldersMap.containsKey(albumName)) {
-                        foldersMap[albumName]?.run {
+                    val album = Album(albumId, albumName,  ContentUris.withAppendedId(contentUri, mediaId))
+                    if (albumMap.containsKey(albumName)) {
+                        albumMap[albumName]?.run {
                             this.mediaCount += 1
                             this.mediaList.add( Media(
                                 mediaId,
@@ -60,8 +60,8 @@ suspend fun ContentResolver.getGalleryData(): GalleryData {
                             ))
                         }
                     } else {
-                        folder.mediaCount += 1
-                        folder.mediaList.add(
+                        album.mediaCount += 1
+                        album.mediaList.add(
                             Media(
                                 mediaId,
                                 mediaName,
@@ -73,14 +73,14 @@ suspend fun ContentResolver.getGalleryData(): GalleryData {
                                 mimeType
                             )
                         )
-                        foldersMap[albumName] = folder
+                        albumMap[albumName] = album
                     }
 
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                 }
             }
-            galleryData.albumsList .addAll( foldersMap.filter {
+            galleryData.albumsList .addAll( albumMap.filter {
                 it.value.label.isNotBlank()
             }.map {
                 it.value
@@ -93,8 +93,6 @@ suspend fun ContentResolver.getGalleryData(): GalleryData {
             galleryData.allImagesList.first().run {
                 galleryData.albumsList.add(0,Album(label="All Images",
                     uri=this.uri,
-                    pathToThumbnail = this.path,
-                    relativePath = this.relativePath,
                     mediaCount = galleryData.allImagesList.size,
                     mediaList = galleryData.allImagesList
                     ))
@@ -103,8 +101,6 @@ suspend fun ContentResolver.getGalleryData(): GalleryData {
             galleryData.allVideosList.first().run {
                 galleryData.albumsList.add(0,Album(label="All Video",
                     uri=this.uri,
-                    pathToThumbnail = this.path,
-                    relativePath = this.relativePath,
                     mediaCount = galleryData.allVideosList.size,
                     mediaList = galleryData.allVideosList
                 ))
