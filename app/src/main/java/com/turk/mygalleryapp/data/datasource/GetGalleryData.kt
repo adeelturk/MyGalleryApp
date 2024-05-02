@@ -22,13 +22,13 @@ suspend fun ContentResolver.getGalleryData(): GalleryData {
             while (it.moveToNext()) {
                 try {
                     val albumId =
-                        it.getLong(it.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_ID))
-                    val mediaId = it.getLong(it.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
+                        it.getLong(it.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_ID))
+                    val mediaId = it.getLong(it.getColumnIndexOrThrow(MediaStore.MediaColumns._ID))
                     val albumName =
-                        it.getString(it.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME))
+                        it.getString(it.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME))
                             ?: ""
                     val mediaName =
-                        it.getString(it.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME))
+                        it.getString(it.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME))
                             ?: ""
                     val mimeType =
                         it.getString(it.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE))
@@ -122,7 +122,7 @@ suspend fun ContentResolver.getGalleryData(): GalleryData {
 
 suspend fun ContentResolver.query(
 ): Cursor {
-    val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
+    val sortOrder = "${MediaStore.MediaColumns.DATE_ADDED} DESC"
     return withContext(Dispatchers.IO) {
         return@withContext MergeCursor(
             arrayOf(

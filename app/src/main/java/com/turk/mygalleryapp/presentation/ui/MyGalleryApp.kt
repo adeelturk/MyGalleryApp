@@ -17,6 +17,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,17 +25,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.turk.mygalleryapp.R
-import com.turk.mygalleryapp.core.MyGalleryConstants
 import com.turk.mygalleryapp.presentation.AppState
 import com.turk.mygalleryapp.presentation.GalleryViewModel
 import com.turk.mygalleryapp.presentation.ui.screens.GalleryScreen
 import com.turk.mygalleryapp.presentation.ui.screens.MediaScreen
+import com.turk.mygalleryapp.presentation.ui.screens.PermissionScreen
 import com.turk.mygalleryapp.presentation.ui.theme.SmallTitle
+import com.turk.mygalleryapp.presentation.ui.utils.MyGalleryConstants
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -45,9 +52,13 @@ fun MyGalleryApp(appState: AppState) {
     var screenTitle : String by remember {
         mutableStateOf("")
     }
+
     val viewModel= hiltViewModel<GalleryViewModel>()
     screenTitle= stringResource(id = R.string.albums)
-    viewModel.getAlbums()
+    val isPermissionGranted = remember { mutableStateOf(false) }
+    IsPermissionGranted {
+        isPermissionGranted.value = it
+    }
     val context= LocalContext.current
     Box(
         modifier = Modifier
@@ -71,8 +82,14 @@ fun MyGalleryApp(appState: AppState) {
                     modifier = Modifier.padding(paddingValues = it)
                     ,
                     navController = appState.navController,
-                    startDestination = MyGalleryConstants.GalleryScreenNav
+                    startDestination =if(isPermissionGranted.value) MyGalleryConstants.GalleryScreenNav else MyGalleryConstants.PermissionScreenNav
                 ) {
+
+                    composable(route = MyGalleryConstants.PermissionScreenNav) {
+                       PermissionScreen {
+                           appState.navController.navigate( MyGalleryConstants.GalleryScreenNav)
+                       }
+                    }
 
                     composable(route = MyGalleryConstants.GalleryScreenNav) {
                         GalleryScreen(viewModel){
@@ -103,6 +120,34 @@ fun MyGalleryApp(appState: AppState) {
     }
 
 
+
+}
+
+@Composable
+@OptIn(ExperimentalPermissionsApi::class)
+private fun IsPermissionGranted(isPermissionGranted: (Boolean) -> Unit) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val permissionsList = MyGalleryConstants.PERMISSIONS
+
+    val permissionState = rememberMultiplePermissionsState(
+        permissions = permissionsList
+    )
+
+    DisposableEffect(key1 = lifecycleOwner) {
+        val observer = LifecycleEventObserver { source, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> {
+                    isPermissionGranted(permissionState.allPermissionsGranted)
+                }
+
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
 }
 

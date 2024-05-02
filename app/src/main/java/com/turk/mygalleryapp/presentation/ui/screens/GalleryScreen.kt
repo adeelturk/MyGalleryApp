@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,9 +28,11 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.size.Scale
+import com.turk.mygalleryapp.R
 import com.turk.mygalleryapp.domain.model.Album
 import com.turk.mygalleryapp.presentation.GalleryViewModel
 import com.turk.mygalleryapp.presentation.ui.theme.SmallBody
+import com.turk.mygalleryapp.presentation.ui.theme.SmallHeading
 import com.turk.mygalleryapp.presentation.ui.theme.SmallTitleBold
 import com.turk.mygalleryapp.presentation.ui.theme.smallUnit
 
@@ -39,17 +42,26 @@ fun GalleryScreen(viewModel:GalleryViewModel,viewMediaGallery:()->Unit){
 
 
     val galleryDataState= viewModel.galleryData.collectAsState()
-
+    val showLoading= viewModel.resultsRecieved.collectAsState()
+    viewModel.getAlbums()
     Box ( modifier = Modifier
         .fillMaxSize()
         .padding(smallUnit)
         .background(color = Color.Transparent),
         contentAlignment = Alignment.TopStart){
-        GalleryGrid(galleryDataState.value.albumsList){
 
+        if(!showLoading.value) {
+            SmallHeading(
+                text = stringResource(id = R.string.loading),
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+        GalleryGrid(galleryDataState.value.albumsList){
             viewModel.selectedIndex=it
             viewMediaGallery()
         }
+
+
     }
 
 }

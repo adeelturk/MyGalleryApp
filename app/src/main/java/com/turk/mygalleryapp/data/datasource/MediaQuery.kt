@@ -15,9 +15,7 @@ object MediaQuery {
     MediaStore.MediaColumns.DISPLAY_NAME,
     MediaStore.MediaColumns.DATA,
     MediaStore.MediaColumns.RELATIVE_PATH,
-    MediaStore.MediaColumns.MIME_TYPE,
-    MediaStore.Video.Thumbnails.DATA
-
+    MediaStore.MediaColumns.MIME_TYPE
    )
 
 }

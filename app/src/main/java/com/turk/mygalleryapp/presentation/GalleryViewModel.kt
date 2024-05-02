@@ -18,6 +18,8 @@ class GalleryViewModel @Inject constructor(private val galleryUseCase: FetchGall
     private val _galleryData = MutableStateFlow(GalleryData())
     val galleryData = _galleryData.asStateFlow()
 
+    var resultsRecieved  = MutableStateFlow(false)
+
     var selectedIndex=-1
 
     fun getSelectedAlbumMediaFiles():ArrayList<Media> {
@@ -33,7 +35,7 @@ class GalleryViewModel @Inject constructor(private val galleryUseCase: FetchGall
         viewModelScope.launch {
 
             galleryUseCase.invoke().collectLatest {
-
+                resultsRecieved.value=true
                 _galleryData.emit(it)
             }
 

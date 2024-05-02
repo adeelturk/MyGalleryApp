@@ -260,9 +260,11 @@ fun MediumBody(
   maxLines: Int = Int.MAX_VALUE,
   color: Color = Color.Unspecified,
   textAlign: TextAlign? = null,
-  isTextWithShadow:Boolean=false
+  isTextWithShadow:Boolean=false,
+  modifier: Modifier
 ) {
   MyGalleryText(
+    modifier=modifier,
     fontSize = FontSize.Medium,
     maxLines = maxLines,
     fontFamily = FontFamily.Body,
