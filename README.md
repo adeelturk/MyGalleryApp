@@ -1,8 +1,5 @@
 # MyGalleryApp
-An application to show all the images and videos in a gallery in their corresponding folders
+An application to show univserities in turky and its detail
 
 ## Architecture
-App is developed using mvvm acrhiecture 
-
-## UI 
-Application is developed using compose ui 
+App is developed using multi modular mvvm acrhiecture 
