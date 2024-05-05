@@ -1,5 +1,7 @@
-# University app
-An application to show univserities in turky and its detail
+# My galery App
+An application to show images and videos
 
 ## Architecture
-App is developed using multi modular mvvm acrhiecture 
+App is developed using MVVM acrhiecture 
+## UI
+develoepd using compose ui 
