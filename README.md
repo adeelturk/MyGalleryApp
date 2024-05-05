@@ -1,4 +1,4 @@
-# MyGalleryApp
+# University app
 An application to show univserities in turky and its detail
 
 ## Architecture
